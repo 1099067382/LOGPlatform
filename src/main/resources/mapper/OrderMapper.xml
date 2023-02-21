@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.logplatform.mapper.OrderMapper">
+
+    <resultMap id="OrderItemEntityMap" type="com.example.logplatform.entity.OrderItem">
+        <id column="id" property="id"/>
+        <id column="oid" property="oid"/>
+        <id column="pid" property="pid"/>
+        <result column="title" property="title"/>
+        <result column="image" property="image"/>
+        <result column="price" property="price"/>
+        <result column="rent" property="rent"/>
+        <result column="num" property="num"/>
+        <result column="isReturn" property="isReturn"/>
+        <result column="rentTime" property="rentTime"/>
+        <result column="status" property="status"/>
+    </resultMap>
+
+    <!-- 插入订单数据：Integer insertOrder(Order order) -->
+    <insert id="insertOrder" useGeneratedKeys="true" keyProperty="oid">
+        INSERT INTO t_order (uid, recv_name, recv_phone, recv_province, recv_city, recv_area, recv_address,
+                             total_price, status, order_time, pay_time, created_user, created_time, modified_user, modified_time)
+        VALUES (#{uid}, #{recvName}, #{recvPhone}, #{recvProvince}, #{recvCity}, #{recvArea},
+                #{recvAddress}, #{totalPrice}, #{status}, #{orderTime}, #{payTime},
+                #{createdUser}, #{createdTime}, #{modifiedUser}, #{modifiedTime})
+    </insert>
+
+    <!-- 插入订单商品数据：Integer insertOrderItem(OrderItem orderItem) -->
+    <insert id="insertOrderItem" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO t_order_item (oid, pid, title, image, price, rent, is_return, rent_time, num, status, created_user,
+                                  created_time, modified_user, modified_time)
+        VALUES (#{oid}, #{pid}, #{title}, #{image}, #{price}, #{rent}, #{isReturn}, #{rentTime}, #{num}, #{status},
+                #{createdUser},
+                #{createdTime}, #{modifiedUser}, #{modifiedTime})
+    </insert>
+
+    <select id="findVOByUid" resultType="com.example.logplatform.vo.OrderVO">
+        SELECT t_order_item.id,
+               t_order.oid,
+               t_order.uid,
+               t_order.recv_name,
+               t_order.recv_phone,
+               t_order.recv_province,
+               t_order.recv_city,
+               t_order.recv_area,
+               t_order.recv_address,
+               t_order.total_price,
+               t_order.order_time,
+               t_order.pay_time,
+               t_order.created_user,
+               t_order_item.image,
+               t_order_item.title,
+               t_order_item.price,
+               t_order_item.rent,
+               t_order_item.rent_time,
+               t_order_item.num,
+               t_order_item.status,
+               t_order_item.is_return,
+               t_order_item.created_time
+        FROM t_order,
+             t_order_item
+        WHERE t_order.oid = t_order.oid
+          AND t_order.oid = t_order_item.oid
+          AND uid = #{uid}
+        ORDER BY t_order_item.created_time DESC
+    </select>
+
+    <update id="updateStatusByid">
+        UPDATE
+            t_order_item
+        SET status= #{status},
+            modified_user=#{modifiedUser},
+            modified_time=#{modifiedTime}
+        WHERE id = #{id}
+    </update>
+
+    <update id="updateIsReturnByid">
+        UPDATE
+            t_order_item
+        SET is_return=1,
+            modified_user=#{modifiedUser},
+            modified_time=#{modifiedTime}
+        WHERE id = #{id}
+    </update>
+
+    <select id="findByid" resultMap="OrderItemEntityMap">
+        SELECT *
+        FROM t_order_item
+        WHERE id = #{id}
+    </select>
+</mapper>
